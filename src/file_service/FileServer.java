@@ -1,5 +1,6 @@
 package file_service;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
@@ -21,6 +22,27 @@ public class FileServer {
             String command = new String(a);
             switch (command){
                 case "del":
+                    byte[] b = new byte[request.remaining()];
+                    request.get(b);
+                    String fileName = new String(b);
+
+                    System.out.println("File to delete: " +fileName);
+                    File file = new File("ServerFiles/"+fileName);
+                    boolean success = false;
+                    if(file.exists()){
+                        success = file.delete();
+                    }
+                    if(success){
+                        System.out.println("File deleted successfully.");
+                        ByteBuffer code = ByteBuffer.wrap("S".getBytes());
+                        serverChannel.write(code);
+                    }else{
+                        System.out.println("Unable to delete file");
+                        ByteBuffer code = ByteBuffer.wrap("F".getBytes());
+                        serverChannel.write(code);
+                    }
+                    serverChannel.close();
+                    //delete
                     break;
                 case "lis":
                     break;
