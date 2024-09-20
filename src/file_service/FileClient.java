@@ -28,6 +28,20 @@ public class FileClient {
                     channel.write(request);
                     channel.shutdownOutput();
                     //TODO: receive the status code and tell the user
+                    ByteBuffer reply = ByteBuffer.allocate(3);
+                    channel.read(reply);
+                    channel.close();
+                    reply.flip();
+                    byte[] a = new byte[3];
+                    reply.get(a);
+                    String code = new String(a);
+                    if(code.equals("Suc")){
+                        System.out.println("File was successfully deleted.");
+                    }else if (code.equals("Fai")){
+                        System.out.println("Failed to delete the file.");
+                    }else{
+                        System.out.println("Invalid server code received!");
+                    }
                     break;
                     //delete
                 case "lis":

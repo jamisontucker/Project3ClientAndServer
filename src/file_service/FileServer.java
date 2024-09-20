@@ -34,11 +34,11 @@ public class FileServer {
                     }
                     if(success){
                         System.out.println("File deleted successfully.");
-                        ByteBuffer code = ByteBuffer.wrap("S".getBytes());
+                        ByteBuffer code = ByteBuffer.wrap("Suc".getBytes());
                         serverChannel.write(code);
                     }else{
                         System.out.println("Unable to delete file");
-                        ByteBuffer code = ByteBuffer.wrap("F".getBytes());
+                        ByteBuffer code = ByteBuffer.wrap("Fai".getBytes());
                         serverChannel.write(code);
                     }
                     serverChannel.close();
