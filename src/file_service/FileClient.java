@@ -60,6 +60,17 @@ public class FileClient {
                     break;
                     //list
                 case "ren":
+                    System.out.println("Please enter the file name: ");
+                    String renFileName = keyboard.nextLine();
+                    System.out.println("Please enter the new name:" );
+                    String newName = keyboard.nextLine();
+                    ByteBuffer renRequest = ByteBuffer.wrap(
+                            (command+renFileName+newName).getBytes()
+                    );
+                    SocketChannel renChannel = SocketChannel.open();
+                    renChannel.connect(new InetSocketAddress(args[0], serverPort));
+                    renChannel.write(renRequest);
+                    renChannel.shutdownOutput();
                     break;
                     //rename
                 case "upl":
