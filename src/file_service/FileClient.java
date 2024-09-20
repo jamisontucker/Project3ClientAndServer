@@ -45,6 +45,18 @@ public class FileClient {
                     break;
                     //delete
                 case "lis":
+                    ByteBuffer lisrequest = ByteBuffer.wrap((command).getBytes());
+                    SocketChannel lischannel = SocketChannel.open();
+                    lischannel.connect(new InetSocketAddress(args[0], serverPort));
+                    lischannel.write(lisrequest);
+                    lischannel.shutdownOutput();
+                    ByteBuffer lisreply = ByteBuffer.allocate(3);
+                    lischannel.read(lisreply);
+                    lischannel.close();
+                    lisreply.flip();
+                    byte[] l = new byte[3];
+                    lisreply.get(l);
+                    String liscode = new String(l);
                     break;
                     //list
                 case "ren":
