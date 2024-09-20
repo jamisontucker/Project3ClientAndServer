@@ -35,9 +35,9 @@ public class FileClient {
                     byte[] a = new byte[3];
                     reply.get(a);
                     String code = new String(a);
-                    if(code.equals("Suc")){
+                    if(code.equals("suc")){
                         System.out.println("File was successfully deleted.");
-                    }else if (code.equals("Fai")){
+                    }else if (code.equals("fai")){
                         System.out.println("Failed to delete the file.");
                     }else{
                         System.out.println("Invalid server code received!");
