@@ -45,6 +45,16 @@ public class FileServer {
                     //delete
                     break;
                 case "lis":
+                    File folder = new File(".");
+                    File[] listOfFiles = folder.listFiles();
+                    if (listOfFiles != null) {
+                        for (File listOfFile : listOfFiles) {
+                            String listFile = (listOfFile.getName());
+                            ByteBuffer toClient = ByteBuffer.wrap(listFile.getBytes());
+                            serverChannel.write(toClient);
+                        }
+                    }
+                    serverChannel.close();
                     break;
                 case "ren":
                     break;
