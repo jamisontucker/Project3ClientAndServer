@@ -57,6 +57,27 @@ public class FileServer {
                     serverChannel.close();
                     break;
                 case "ren":
+                    byte[] d = new byte[request.remaining()];
+                    request.get(d);
+                    String remaining = new String(d);
+                    String[] arr = remaining.split("<", 1);
+
+                    System.out.println("File to rename: " + arr[0]);
+                    File renFile = new File("ServerFiles/"+arr[0]);
+                    File toFile = new File("ServerFiles/"+arr[1]);
+                    boolean renSuccess = false;
+                    if(renFile.exists()){
+                        renSuccess = renFile.renameTo(toFile);
+                    }
+                    if(renSuccess){
+                        System.out.println("File renamed successfully");
+                        ByteBuffer renCode = ByteBuffer.wrap("suc".getBytes());
+                        serverChannel.write(renCode);
+                    }else{
+                        System.out.println("File could not be renamed");
+                        ByteBuffer renCode = ByteBuffer.wrap("fai".getBytes());
+                        serverChannel.write(renCode);
+                    }
                     break;
                 case "upl":
                     break;
