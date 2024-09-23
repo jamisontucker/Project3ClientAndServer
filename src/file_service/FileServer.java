@@ -45,7 +45,7 @@ public class FileServer {
                     //delete
                     break;
                 case "lis":
-                    File folder = new File(".");
+                    File folder = new File("ServerFiles/");
                     File[] listOfFiles = folder.listFiles();
                     if (listOfFiles != null) {
                         for (File listOfFile : listOfFiles) {
