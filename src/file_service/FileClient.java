@@ -1,5 +1,7 @@
 package file_service;
 
+import org.w3c.dom.DOMStringList;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -59,12 +61,27 @@ public class FileClient {
                     System.out.println("Please enter the new name:" );
                     String newName = keyboard.nextLine();
                     ByteBuffer renRequest = ByteBuffer.wrap(
-                            (command+renFileName+newName).getBytes()
+                            (command+renFileName+"<"+newName).getBytes()
                     );
                     SocketChannel renChannel = SocketChannel.open();
                     renChannel.connect(new InetSocketAddress(args[0], serverPort));
                     renChannel.write(renRequest);
                     renChannel.shutdownOutput();
+
+                    ByteBuffer renReply = ByteBuffer.allocate(3);
+                    renChannel.read(renReply);
+                    renChannel.close();
+                    renReply.flip();
+                    byte[] c = new byte[3];
+                    renReply.get(c);
+                    String renCode = new String(c);
+                    if(renCode.equals("suc")){
+                        System.out.println("File was successfully renamed.");
+                    }else if (renCode.equals("fai")){
+                        System.out.println("Failed to rename the file.");
+                    }else{
+                        System.out.println("Invalid server code received!");
+                    }
                     break;
                     //rename
                 case "upl":

@@ -60,9 +60,10 @@ public class FileServer {
                     byte[] d = new byte[request.remaining()];
                     request.get(d);
                     String remaining = new String(d);
-                    String[] arr = remaining.split("<", 1);
+                    String[] arr = remaining.split("<");
 
                     System.out.println("File to rename: " + arr[0]);
+                    System.out.println("New name: " + arr[1]);
                     File renFile = new File("ServerFiles/"+arr[0]);
                     File toFile = new File("ServerFiles/"+arr[1]);
                     boolean renSuccess = false;
