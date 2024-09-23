@@ -21,19 +21,19 @@ public class FileClient {
                 case "del":
                     System.out.println("Please enter the file name:");
                     String fileName = keyboard.nextLine();
-                    ByteBuffer request = ByteBuffer.wrap(
+                    ByteBuffer delRequest = ByteBuffer.wrap(
                             (command+fileName).getBytes());
                     SocketChannel channel = SocketChannel.open();
                     channel.connect(new InetSocketAddress(args[0], serverPort));
-                    channel.write(request);
+                    channel.write(delRequest);
                     channel.shutdownOutput();
                     //TODO: receive the status code and tell the user
-                    ByteBuffer reply = ByteBuffer.allocate(3);
-                    channel.read(reply);
+                    ByteBuffer delReply = ByteBuffer.allocate(3);
+                    channel.read(delReply);
                     channel.close();
-                    reply.flip();
+                    delReply.flip();
                     byte[] a = new byte[3];
-                    reply.get(a);
+                    delReply.get(a);
                     String code = new String(a);
                     if(code.equals("suc")){
                         System.out.println("File was successfully deleted.");
@@ -51,6 +51,14 @@ public class FileClient {
                     lisChannel.write(lisRequest);
                     lisChannel.shutdownOutput();
                     //TODO: Receive list array from server
+                    ByteBuffer lisReply = ByteBuffer.allocate(1024);
+                    int lisReplyRead = lisChannel.read(lisReply);
+                    lisChannel.close();
+                    lisReply.flip();
+                    byte[] b = new byte[lisReplyRead];
+                    lisReply.get(b);
+                    String replyList = new String(b);
+                    System.out.println(replyList);
                     break;
                     //list
                 case "ren":
