@@ -47,12 +47,16 @@ public class FileServer {
                 case "lis":
                     File folder = new File("ServerFiles/");
                     File[] listOfFiles = folder.listFiles();
+                    String files = "";
                     if (listOfFiles != null) {
                         for (File listOfFile : listOfFiles) {
                             String listFile = (listOfFile.getName());
-                            ByteBuffer toClient = ByteBuffer.wrap(listFile.getBytes());
-                            serverChannel.write(toClient);
+                            files = files + listFile + "<";
+                            //ByteBuffer toClient = ByteBuffer.wrap(listFile.getBytes());
+                            //serverChannel.write(toClient);
                         }
+                        ByteBuffer toClient = ByteBuffer.wrap(files.getBytes());
+                        serverChannel.write(toClient);
                     }
                     serverChannel.close();
                     break;

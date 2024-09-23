@@ -60,7 +60,10 @@ public class FileClient {
                     byte[] b = new byte[lisReplyRead];
                     lisReply.get(b);
                     String replyList = new String(b);
-                    System.out.println(replyList);
+                    String[] arr = replyList.split("<");
+                    for (int i = 0; i < arr.length; i++) {
+                        System.out.println(arr[i]);
+                    }
                     break;
                     //list
                 case "ren":
