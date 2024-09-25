@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
+import java.io.FileInputStream;
 
 public class FileClient {
     public static void main(String[] args) throws Exception {
@@ -98,7 +99,7 @@ public class FileClient {
                 case "upl":
                     SocketChannel uplChannel = SocketChannel.open();
 
-                    channel.connect(new InetSocketAddress(args[0], serverPort));
+                    uplChannel.connect(new InetSocketAddress(args[0], serverPort));
                     FileInputStream fis = new FileInputStream("test.jpg");
                     byte[] data = new byte[1024];
                     int bytesRead = 0;
@@ -119,6 +120,9 @@ public class FileClient {
                     break;
                     //upload
                 case "dow":
+                    System.out.println("Enter name of file to download: ");
+                    String dowFileName = keyboard.nextLine();
+
                     break;
                     //download
                 default:
