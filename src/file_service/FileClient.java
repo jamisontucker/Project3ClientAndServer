@@ -97,9 +97,12 @@ public class FileClient {
                     break;
                     //rename
                 case "upl":
-                    
+                    System.out.println("Enter name of file to upload: ");
+                    String uplFileName = keyboard.nextLine();
+                    ByteBuffer uplRequest = ByteBuffer.wrap(
+                            (command+dowFileName).getBytes()
+                    );
                     SocketChannel uplChannel = SocketChannel.open();
-
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
                     FileInputStream fis = new FileInputStream("test.jpg");
                     byte[] data = new byte[1024];
