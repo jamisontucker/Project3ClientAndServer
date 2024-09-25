@@ -88,6 +88,12 @@ public class FileServer {
 
                     break;
                 case "dow":
+                    byte[] f = new byte[request.remaining()];
+                    request.get(f);
+                    String dowFileName = new String(f);
+
+                    System.out.println("File to download: " + dowFileName);
+                    File dowFile = new File("ServerFiles/" + dowFileName);
                     break;
                 default:
                     System.out.print("Invalid command!");
