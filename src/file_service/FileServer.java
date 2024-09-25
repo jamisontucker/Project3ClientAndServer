@@ -1,7 +1,7 @@
 package file_service;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
@@ -86,24 +86,7 @@ public class FileServer {
                     }
                     break;
                 case "upl":
-                    byte[] uploadArr = new byte[request.remaining()];
-                    request.get(uploadArr);
-                    String uploadRequest = new String(uploadArr);
-                    FileOutputStream fos = new FileOutputStream(uploadRequest);
-                    int readBytes;
-                    while ((readBytes = serverChannel.read(request)) != -1){
-                        request.flip();
-                        byte[] readRequest = new byte[readBytes];
-                        request.get(readRequest);
-                        fos.write(readRequest);
-                        request.clear();
-                    }
-                    fos.close();
 
-                    String replyConfirmation = "S";
-                    ByteBuffer replyBuffer = ByteBuffer.wrap(replyConfirmation.getBytes());
-                    serverChannel.write(replyBuffer);
-                    serverChannel.close();
                     break;
                 case "dow":
                     byte[] f = new byte[request.remaining()];
@@ -112,6 +95,25 @@ public class FileServer {
 
                     System.out.println("File to download: " + dowFileName);
                     File dowFile = new File("ServerFiles/" + dowFileName);
+                    boolean dowSucces = false;
+                    if(dowFile.exists()){
+                        ByteBuffer dowCode = ByteBuffer.wrap("suc".getBytes());
+                        serverChannel.write(dowCode);
+                        FileInputStream dowFis = new FileInputStream(dowFile);
+                        byte[] dowData = new byte[1024];
+                        int bytesRead = 0;
+                        while((bytesRead=dowFis.read(dowData)) != -1){
+                            ByteBuffer buffer = ByteBuffer.wrap(dowData, 0, bytesRead);
+                            serverChannel.write(buffer);
+                        }
+                        dowSucces = true;
+                    }
+                    if (dowSucces){
+                        System.out.println("File found");
+                    }
+                    else {
+                        System.out.println("File not found");
+                    }
                     break;
                 default:
                     System.out.print("Invalid command!");

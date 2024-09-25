@@ -2,6 +2,7 @@ package file_service;
 
 import org.w3c.dom.DOMStringList;
 
+import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -140,6 +141,26 @@ public class FileClient {
                     dowChannel.connect(new InetSocketAddress(args[0], serverPort));
                     dowChannel.write(dowRequest);
                     dowChannel.shutdownOutput();
+
+                    ByteBuffer dowSucReply = ByteBuffer.allocate(3);
+                    dowChannel.read(dowSucReply);
+                    dowSucReply.flip();
+                    byte[] f = new byte[3];
+                    dowSucReply.get(f);
+                    String dowCode = new String(f);
+                    if (dowCode.equals("suc")){
+                        FileOutputStream dowFos = new FileOutputStream("Downloads/" + dowFileName);
+                        ByteBuffer dowReply = ByteBuffer.allocate(1024);
+                        int dowBytesRead = 0;
+                        while((dowBytesRead = dowChannel.read(dowReply)) != -1){
+                            dowReply.flip();
+                            byte[] g = new byte[dowBytesRead];
+                            dowReply.get(g);
+                            dowFos.write(g);
+                            dowReply.clear();
+                        }
+                        dowFos.close();
+                    }
                     break;
                     //download
                 default:
