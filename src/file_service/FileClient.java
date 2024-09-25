@@ -130,7 +130,13 @@ public class FileClient {
                 case "dow":
                     System.out.println("Enter name of file to download: ");
                     String dowFileName = keyboard.nextLine();
-
+                    ByteBuffer dowRequest = ByteBuffer.wrap(
+                            (command+dowFileName).getBytes()
+                    );
+                    SocketChannel dowChannel = SocketChannel.open();
+                    dowChannel.connect(new InetSocketAddress(args[0], serverPort));
+                    dowChannel.write(dowRequest);
+                    dowChannel.shutdownOutput();
                     break;
                     //download
                 default:
