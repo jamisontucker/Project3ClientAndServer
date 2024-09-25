@@ -1,6 +1,7 @@
 package file_service;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
@@ -85,7 +86,24 @@ public class FileServer {
                     }
                     break;
                 case "upl":
+                    byte[] uploadArr = new byte[request.remaining()];
+                    request.get(uploadArr);
+                    String uploadRequest = new String(uploadArr);
+                    FileOutputStream fos = new FileOutputStream(uploadRequest);
+                    int readBytes;
+                    while ((readBytes = serverChannel.read(request)) != -1){
+                        request.flip();
+                        byte[] readRequest = new byte[readBytes];
+                        request.get(readRequest);
+                        fos.write(readRequest);
+                        request.clear();
+                    }
+                    fos.close();
 
+                    String replyConfirmation = "S";
+                    ByteBuffer replyBuffer = ByteBuffer.wrap(replyConfirmation.getBytes());
+                    serverChannel.write(replyBuffer);
+                    serverChannel.close();
                     break;
                 case "dow":
                     byte[] f = new byte[request.remaining()];
