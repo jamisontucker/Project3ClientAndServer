@@ -100,7 +100,7 @@ public class FileClient {
                     System.out.println("Enter name of file to upload: ");
                     String uplFileName = keyboard.nextLine();
                     ByteBuffer uplRequest = ByteBuffer.wrap(
-                            (command+dowFileName).getBytes()
+                            (command+uplFileName).getBytes()
                     );
                     SocketChannel uplChannel = SocketChannel.open();
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
@@ -109,21 +109,21 @@ public class FileClient {
                     int bytesRead = 0;
                     while((bytesRead=fis.read(data)) != -1) {
                         ByteBuffer buffer = ByteBuffer.wrap(data, 0, bytesRead);
-                        channel.write(buffer);
+                        uplChannel.write(buffer);
                     }
                     fis.close();
-                    channel.shutdownOutput();
+                    uplChannel.shutdownOutput();
 
-                    ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
-                    bytesRead = channel.read(replyBuffer);
-                    channel.close();
+                    ByteBuffer uplReply = ByteBuffer.allocate(1024);
+                    bytesRead = uplChannel.read(uplReply);
+                    uplChannel.close();
                     uplReply.flip();
-                    byte[] a = new byte[3];
-                    uplReply.get(a);
-                    String code = new String(a);
-                    if(code.equals("suc")){
+                    byte[] u = new byte[3];
+                    uplReply.get(u);
+                    String uplCode = new String(u);
+                    if(uplCode.equals("suc")){
                         System.out.println("File was successfully uploaded.");
-                    }else if (code.equals("fai")){
+                    }else if (uplCode.equals("fai")){
                         System.out.println("Failed to upload the file.");
                     }else{
                         System.out.println("Invalid server code received!");
