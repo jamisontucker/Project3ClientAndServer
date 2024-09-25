@@ -103,9 +103,10 @@ public class FileClient {
                     ByteBuffer uplRequest = ByteBuffer.wrap(
                             (command+uplFileName).getBytes()
                     );
+                    uplFileName.length()
                     SocketChannel uplChannel = SocketChannel.open();
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
-                    FileInputStream fis = new FileInputStream("test.jpg");
+                    FileInputStream fis = new FileInputStream(uplFileName);
                     byte[] data = new byte[1024];
                     int bytesRead = 0;
                     while((bytesRead=fis.read(data)) != -1) {
@@ -113,6 +114,7 @@ public class FileClient {
                         uplChannel.write(buffer);
                     }
                     fis.close();
+                    uplChannel.write(uplRequest);
                     uplChannel.shutdownOutput();
 
                     ByteBuffer uplReply = ByteBuffer.allocate(1024);
