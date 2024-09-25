@@ -96,6 +96,26 @@ public class FileClient {
                     break;
                     //rename
                 case "upl":
+                    SocketChannel uplChannel = SocketChannel.open();
+
+                    channel.connect(new InetSocketAddress(args[0], serverPort));
+                    FileInputStream fis = new FileInputStream("test.jpg");
+                    byte[] data = new byte[1024];
+                    int bytesRead = 0;
+                    while((bytesRead=fis.read(data)) != -1) {
+                        ByteBuffer buffer = ByteBuffer.wrap(data, 0, bytesRead);
+                        channel.write(buffer);
+                    }
+                    fis.close();
+                    channel.shutdownOutput();
+
+                    ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+                    bytesRead = channel.read(replyBuffer);
+                    channel.close();
+                    replyBuffer.flip();
+                    byte[] a = new byte[bytesRead];
+                    replyBuffer.get(a);
+                    System.out.println(new String(a));
                     break;
                     //upload
                 case "dow":
