@@ -97,6 +97,7 @@ public class FileClient {
                     break;
                     //rename
                 case "upl":
+                    
                     SocketChannel uplChannel = SocketChannel.open();
 
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
@@ -113,10 +114,17 @@ public class FileClient {
                     ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
                     bytesRead = channel.read(replyBuffer);
                     channel.close();
-                    replyBuffer.flip();
-                    byte[] a = new byte[bytesRead];
-                    replyBuffer.get(a);
-                    System.out.println(new String(a));
+                    uplReply.flip();
+                    byte[] a = new byte[3];
+                    uplReply.get(a);
+                    String code = new String(a);
+                    if(code.equals("suc")){
+                        System.out.println("File was successfully uploaded.");
+                    }else if (code.equals("fai")){
+                        System.out.println("Failed to upload the file.");
+                    }else{
+                        System.out.println("Invalid server code received!");
+                    }
                     break;
                     //upload
                 case "dow":
