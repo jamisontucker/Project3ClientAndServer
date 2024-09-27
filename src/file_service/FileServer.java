@@ -126,8 +126,11 @@ public class FileServer {
                         System.out.println("File found");
                     }
                     else {
+                        ByteBuffer dowCode = ByteBuffer.wrap("fai".getBytes());
+                        serverChannel.write(dowCode);
                         System.out.println("File not found");
                     }
+                    serverChannel.close();
                     break;
                 default:
                     System.out.print("Invalid command!");

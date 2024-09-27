@@ -4,6 +4,7 @@ import org.w3c.dom.DOMStringList;
 
 import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
@@ -150,19 +151,29 @@ public class FileClient {
                     byte[] f = new byte[3];
                     dowSucReply.get(f);
                     String dowCode = new String(f);
-                    if (dowCode.equals("suc")){
+                    if (dowCode.equals("suc")) {
                         FileOutputStream dowFos = new FileOutputStream("Downloads/" + dowFileName);
                         ByteBuffer dowReply = ByteBuffer.allocate(1024);
                         int dowBytesRead = 0;
-                        while((dowBytesRead = dowChannel.read(dowReply)) != -1){
+                        while ((dowBytesRead = dowChannel.read(dowReply)) != -1) {
                             dowReply.flip();
                             byte[] g = new byte[dowBytesRead];
                             dowReply.get(g);
                             dowFos.write(g);
                             dowReply.clear();
                         }
+                        System.out.println("File downloaded!");
                         dowFos.close();
                     }
+                    else if (dowCode.equals("fai")){
+                        System.out.println("File does not exist!");
+                    }
+                    else{
+                        System.out.println("Invalid code received!");
+                    }
+
+
+                    dowChannel.close();
                     break;
                     //download
                 default:
