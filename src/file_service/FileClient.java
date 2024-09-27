@@ -41,9 +41,9 @@ public class FileClient {
                     delReply.get(a);
                     String code = new String(a);
                     if(code.equals("suc")){
-                        System.out.println("File was successfully deleted.");
+                        System.out.println("File was successfully deleted.\nStatus code: " + code);
                     }else if (code.equals("fai")){
-                        System.out.println("Failed to delete the file.");
+                        System.out.println("Failed to delete the file.\nStatus code: " + code);
                     }else{
                         System.out.println("Invalid server code received!");
                     }
@@ -90,9 +90,9 @@ public class FileClient {
                     renReply.get(c);
                     String renCode = new String(c);
                     if(renCode.equals("suc")){
-                        System.out.println("File was successfully renamed.");
+                        System.out.println("File was successfully renamed.\nStatus code: " + renCode);
                     }else if (renCode.equals("fai")){
-                        System.out.println("Failed to rename the file.");
+                        System.out.println("Failed to rename the file.\n Status code: " + renCode);
                     }else{
                         System.out.println("Invalid server code received!");
                     }
