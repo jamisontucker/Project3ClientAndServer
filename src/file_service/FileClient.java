@@ -4,6 +4,7 @@ import org.w3c.dom.DOMStringList;
 
 import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
@@ -40,9 +41,9 @@ public class FileClient {
                     delReply.get(a);
                     String code = new String(a);
                     if(code.equals("suc")){
-                        System.out.println("File was successfully deleted.");
+                        System.out.println("File was successfully deleted.\nStatus code: " + code);
                     }else if (code.equals("fai")){
-                        System.out.println("Failed to delete the file.");
+                        System.out.println("Failed to delete the file.\nStatus code: " + code);
                     }else{
                         System.out.println("Invalid server code received!");
                     }
@@ -89,9 +90,9 @@ public class FileClient {
                     renReply.get(c);
                     String renCode = new String(c);
                     if(renCode.equals("suc")){
-                        System.out.println("File was successfully renamed.");
+                        System.out.println("File was successfully renamed.\nStatus code: " + renCode);
                     }else if (renCode.equals("fai")){
-                        System.out.println("Failed to rename the file.");
+                        System.out.println("Failed to rename the file.\n Status code: " + renCode);
                     }else{
                         System.out.println("Invalid server code received!");
                     }
@@ -155,19 +156,29 @@ public class FileClient {
                     byte[] f = new byte[3];
                     dowSucReply.get(f);
                     String dowCode = new String(f);
-                    if (dowCode.equals("suc")){
+                    if (dowCode.equals("suc")) {
                         FileOutputStream dowFos = new FileOutputStream("Downloads/" + dowFileName);
                         ByteBuffer dowReply = ByteBuffer.allocate(1024);
                         int dowBytesRead = 0;
-                        while((dowBytesRead = dowChannel.read(dowReply)) != -1){
+                        while ((dowBytesRead = dowChannel.read(dowReply)) != -1) {
                             dowReply.flip();
                             byte[] g = new byte[dowBytesRead];
                             dowReply.get(g);
                             dowFos.write(g);
                             dowReply.clear();
                         }
+                        System.out.println("File downloaded!");
                         dowFos.close();
                     }
+                    else if (dowCode.equals("fai")){
+                        System.out.println("File does not exist!");
+                    }
+                    else{
+                        System.out.println("Invalid code received!");
+                    }
+
+
+                    dowChannel.close();
                     break;
                     //download
                 default:
