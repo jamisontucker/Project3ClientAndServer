@@ -101,20 +101,25 @@ public class FileClient {
                     System.out.println("Enter name of file to upload: ");
                     String uplFileName = keyboard.nextLine();
                     ByteBuffer uplRequest = ByteBuffer.wrap(
-                            (command+uplFileName).getBytes()
+                            (command).getBytes()
                     );
-                    //uplFileName.length()
+
+                    int uplNameLength = uplFileName.length();
+
                     SocketChannel uplChannel = SocketChannel.open();
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
-                    FileInputStream fis = new FileInputStream(uplFileName);
+                    FileInputStream fis = new FileInputStream("");
+                    uplChannel.write(uplRequest);
+                    uplChannel.write(ByteBuffer.allocateDirect(uplNameLength));
+                    uplChannel.write(ByteBuffer.wrap(uplFileName.getBytes()));
                     byte[] data = new byte[1024];
                     int bytesRead = 0;
                     while((bytesRead=fis.read(data)) != -1) {
                         ByteBuffer buffer = ByteBuffer.wrap(data, 0, bytesRead);
                         uplChannel.write(buffer);
                     }
+
                     fis.close();
-                    uplChannel.write(uplRequest);
                     uplChannel.shutdownOutput();
 
                     ByteBuffer uplReply = ByteBuffer.allocate(1024);
