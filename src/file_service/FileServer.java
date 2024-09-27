@@ -85,20 +85,25 @@ public class FileServer {
                         ByteBuffer renCode = ByteBuffer.wrap("fai".getBytes());
                         serverChannel.write(renCode);
                     }
+                    serverChannel.close();
                     break;
                 case "upl":
-                    byte[] uploadArr = new byte[request.remaining()];
-                    request.get(uploadArr);
-                    String uploadRequest = new String(uploadArr);
-                    FileOutputStream fos = new FileOutputStream(uploadRequest);
-                    int readBytes;
-                    while ((readBytes = serverChannel.read(request)) != -1){
-                        request.flip();
-                        byte[] readRequest = new byte[readBytes];
-                        request.get(readRequest);
-                        fos.write(readRequest);
-                        request.clear();
+                    byte[] e = new byte[request.remaining()];
+                    request.get(e);
+                    String uploadRequest = new String(e);
+                    FileOutputStream fos = new FileOutputStream("ServerFiles/"+uploadRequest);
+                    ByteBuffer buffer = ByteBuffer.allocate(1024);
+                    int bytesRead = 0;
+                    while((bytesRead = serverChannel.read(buffer)) != -1){
+                        buffer.flip();
+                        byte[] g = new byte[bytesRead];
+                        buffer.get(g);
+                        fos.write(g);
+                        buffer.clear();
                     }
+                    System.out.println("File uploaded!");
+                    ByteBuffer uplCode = ByteBuffer.wrap("suc".getBytes());
+                    serverChannel.write(uplCode);
                     fos.close();
                     serverChannel.close();
                     break;
@@ -115,10 +120,10 @@ public class FileServer {
                         serverChannel.write(dowCode);
                         FileInputStream dowFis = new FileInputStream(dowFile);
                         byte[] dowData = new byte[1024];
-                        int bytesRead = 0;
-                        while((bytesRead=dowFis.read(dowData)) != -1){
-                            ByteBuffer buffer = ByteBuffer.wrap(dowData, 0, bytesRead);
-                            serverChannel.write(buffer);
+                        int dowBytesRead = 0;
+                        while((dowBytesRead=dowFis.read(dowData)) != -1){
+                            ByteBuffer dowBuffer = ByteBuffer.wrap(dowData, 0, dowBytesRead);
+                            serverChannel.write(dowBuffer);
                         }
                         dowSuccess = true;
                     }

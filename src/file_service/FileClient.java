@@ -2,9 +2,9 @@ package file_service;
 
 import org.w3c.dom.DOMStringList;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
@@ -102,43 +102,47 @@ public class FileClient {
                     System.out.println("Enter name of file to upload: ");
                     String uplFileName = keyboard.nextLine();
                     ByteBuffer uplRequest = ByteBuffer.wrap(
-                            (command).getBytes()
+                            (command+uplFileName).getBytes()
                     );
 
-                    int uplNameLength = uplFileName.length();
 
                     SocketChannel uplChannel = SocketChannel.open();
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
-                    FileInputStream fis = new FileInputStream("");
                     uplChannel.write(uplRequest);
-                    uplChannel.write(ByteBuffer.allocateDirect(uplNameLength));
-                    uplChannel.write(ByteBuffer.wrap(uplFileName.getBytes()));
-                    byte[] data = new byte[1024];
-                    int bytesRead = 0;
-                    while((bytesRead=fis.read(data)) != -1) {
-                        ByteBuffer buffer = ByteBuffer.wrap(data, 0, bytesRead);
-                        uplChannel.write(buffer);
-                    }
 
-                    fis.close();
+                    File uplFile = new File("Uploads/" + uplFileName);
+                    if (uplFile.exists()){
+                        System.out.println("Uploading " + uplFileName);
+                        FileInputStream fis = new FileInputStream("Uploads/" + uplFileName);
+                        byte[] data = new byte[1024];
+                        int bytesRead = 0;
+                        while((bytesRead=fis.read(data)) != -1) {
+                            ByteBuffer buffer = ByteBuffer.wrap(data, 0, bytesRead);
+                            uplChannel.write(buffer);
+                        }
+                        fis.close();
+                    }
+                    else{
+                        System.out.println("File doesn't exist!");
+                    }
                     uplChannel.shutdownOutput();
 
-                    ByteBuffer uplReply = ByteBuffer.allocate(1024);
+                    ByteBuffer uplReply = ByteBuffer.allocate(3);
                     uplChannel.read(uplReply);
-                    uplChannel.close();
                     uplReply.flip();
-                    byte[] u = new byte[3];
-                    uplReply.get(u);
-                    String uplCode = new String(u);
-                    if(uplCode.equals("suc")){
-                        System.out.println("File was successfully uploaded.");
-                    }else if (uplCode.equals("fai")){
-                        System.out.println("Failed to upload the file.");
-                    }else{
-                        System.out.println("Invalid server code received!");
+                    byte[] h = new byte[3];
+                    uplReply.get(h);
+                    String uplCode = new String(h);
+                    if (uplCode.equals("suc")){
+                        System.out.println("File successfully uploaded.\n Status Code: " + uplCode);
                     }
-                    break;
+                    else{
+                        System.out.println("File could not be uploaded.\n Status Code: " + uplCode);
+                    }
+                    uplChannel.close();
                     //upload
+                    break;
+
                 case "dow":
                     System.out.println("Enter name of file to download: ");
                     String dowFileName = keyboard.nextLine();
