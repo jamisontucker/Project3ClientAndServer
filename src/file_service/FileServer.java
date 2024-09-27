@@ -109,7 +109,7 @@ public class FileServer {
 
                     System.out.println("File to download: " + dowFileName);
                     File dowFile = new File("ServerFiles/" + dowFileName);
-                    boolean dowSucces = false;
+                    boolean dowSuccess = false;
                     if(dowFile.exists()){
                         ByteBuffer dowCode = ByteBuffer.wrap("suc".getBytes());
                         serverChannel.write(dowCode);
@@ -120,9 +120,9 @@ public class FileServer {
                             ByteBuffer buffer = ByteBuffer.wrap(dowData, 0, bytesRead);
                             serverChannel.write(buffer);
                         }
-                        dowSucces = true;
+                        dowSuccess = true;
                     }
-                    if (dowSucces){
+                    if (dowSuccess){
                         System.out.println("File found");
                     }
                     else {

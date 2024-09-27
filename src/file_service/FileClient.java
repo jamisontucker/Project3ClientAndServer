@@ -118,7 +118,7 @@ public class FileClient {
                     uplChannel.shutdownOutput();
 
                     ByteBuffer uplReply = ByteBuffer.allocate(1024);
-                    bytesRead = uplChannel.read(uplReply);
+                    uplChannel.read(uplReply);
                     uplChannel.close();
                     uplReply.flip();
                     byte[] u = new byte[3];
