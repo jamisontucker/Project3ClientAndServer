@@ -103,7 +103,7 @@ public class FileClient {
                     ByteBuffer uplRequest = ByteBuffer.wrap(
                             (command+uplFileName).getBytes()
                     );
-                    uplFileName.length()
+                    //uplFileName.length()
                     SocketChannel uplChannel = SocketChannel.open();
                     uplChannel.connect(new InetSocketAddress(args[0], serverPort));
                     FileInputStream fis = new FileInputStream(uplFileName);
