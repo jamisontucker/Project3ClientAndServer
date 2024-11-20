@@ -1,18 +1,19 @@
 package file_service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.*;
 
 public class FileServer {
     public static void main(String[] args)throws Exception{
         int port = 3000;
         ServerSocketChannel listenChannel = ServerSocketChannel.open();
         listenChannel.bind(new InetSocketAddress(port));
+        ExecutorService es = Executors.newFixedThreadPool(10);
+
         while(true){
             SocketChannel serverChannel = listenChannel.accept();
             ByteBuffer request = ByteBuffer.allocate(1024);
@@ -88,24 +89,7 @@ public class FileServer {
                     serverChannel.close();
                     break;
                 case "upl":
-                    byte[] e = new byte[request.remaining()];
-                    request.get(e);
-                    String uploadRequest = new String(e);
-                    FileOutputStream fos = new FileOutputStream("ServerFiles/"+uploadRequest);
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
-                    int bytesRead = 0;
-                    while((bytesRead = serverChannel.read(buffer)) != -1){
-                        buffer.flip();
-                        byte[] g = new byte[bytesRead];
-                        buffer.get(g);
-                        fos.write(g);
-                        buffer.clear();
-                    }
-                    System.out.println("File uploaded!");
-                    ByteBuffer uplCode = ByteBuffer.wrap("suc".getBytes());
-                    serverChannel.write(uplCode);
-                    fos.close();
-                    serverChannel.close();
+                    es.submit(new Upload(request, serverChannel));
                     break;
                 case "dow":
                     byte[] f = new byte[request.remaining()];
@@ -140,6 +124,59 @@ public class FileServer {
                 default:
                     System.out.print("Invalid command!");
             }
+        }
+    }
+    public static class Upload implements Runnable{
+        ByteBuffer request;
+        SocketChannel serverChannel;
+        private final static Semaphore uploadLock = new Semaphore(1);
+        private static Semaphore uploadElement = new Semaphore(0);
+
+        public Upload(ByteBuffer k, SocketChannel j){
+            this.request = k;
+            this.serverChannel = j;
+        }
+
+        public void run() {
+            byte[] e = new byte[request.remaining()];
+            request.get(e);
+            String uploadRequest = new String(e);
+            FileOutputStream fos = null;
+
+            try {
+                uploadLock.acquire();
+                try{
+                    fos = new FileOutputStream("ServerFiles/"+uploadRequest);
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+                ByteBuffer buffer = ByteBuffer.allocate(1024);
+                int bytesRead = 0;
+                try{
+                    while((bytesRead = serverChannel.read(buffer)) != -1){
+                        buffer.flip();
+                        byte[] g = new byte[bytesRead];
+                        buffer.get(g);
+                        fos.write(g);
+                        buffer.clear();
+                    }
+                } catch (RuntimeException | IOException ex) {
+                    ex.printStackTrace();
+                }
+                System.out.println("File uploaded!");
+                ByteBuffer uplCode = ByteBuffer.wrap("suc".getBytes());
+                try{
+                    serverChannel.write(uplCode);
+                    fos.close();
+                    serverChannel.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            uploadLock.release();
+            uploadElement.release();
         }
     }
 }
