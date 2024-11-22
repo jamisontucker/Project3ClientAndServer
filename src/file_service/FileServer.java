@@ -12,7 +12,7 @@ public class FileServer {
         int port = 3000;
         ServerSocketChannel listenChannel = ServerSocketChannel.open();
         listenChannel.bind(new InetSocketAddress(port));
-        ExecutorService es = Executors.newFixedThreadPool(10);
+        ExecutorService es = Executors.newFixedThreadPool(4);
 
         while(true){
             SocketChannel serverChannel = listenChannel.accept();
@@ -89,7 +89,14 @@ public class FileServer {
                     serverChannel.close();
                     break;
                 case "upl":
-                    es.submit(new Upload(request, serverChannel));
+                    byte[] e = new byte[request.remaining()];
+                    request.get(e);
+                    String uploadRequest = new String(e);
+                    boolean isSubmitting = true;
+                    while(isSubmitting) {
+                        es.submit(new Upload(uploadRequest, serverChannel, isSubmitting));
+                    }
+                    es.shutdown();
                     break;
                 case "dow":
                     byte[] f = new byte[request.remaining()];
@@ -127,31 +134,30 @@ public class FileServer {
         }
     }
     public static class Upload implements Runnable{
-        ByteBuffer request;
+        String uploadRequest;
         SocketChannel serverChannel;
+        boolean isSubmitting;
         private final static Semaphore uploadLock = new Semaphore(1);
         private static Semaphore uploadElement = new Semaphore(0);
 
-        public Upload(ByteBuffer k, SocketChannel j){
-            this.request = k;
+        public Upload(String k, SocketChannel j, boolean l){
+            this.uploadRequest = k;
             this.serverChannel = j;
+            this.isSubmitting = l;
         }
 
         public void run() {
-            byte[] e = new byte[request.remaining()];
-            request.get(e);
-            String uploadRequest = new String(e);
             FileOutputStream fos = null;
 
             try {
                 uploadLock.acquire();
                 try{
-                    fos = new FileOutputStream("ServerFiles/"+uploadRequest);
+                    fos = new FileOutputStream("ServerFiles/"+ uploadRequest);
                 } catch (FileNotFoundException ex) {
                     ex.printStackTrace();
                 }
                 ByteBuffer buffer = ByteBuffer.allocate(1024);
-                int bytesRead = 0;
+                int bytesRead;
                 try{
                     while((bytesRead = serverChannel.read(buffer)) != -1){
                         buffer.flip();
@@ -177,6 +183,7 @@ public class FileServer {
             }
             uploadLock.release();
             uploadElement.release();
+            isSubmitting = false;
         }
     }
 }
