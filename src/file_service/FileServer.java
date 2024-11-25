@@ -55,8 +55,6 @@ public class FileServer {
                         for (File listOfFile : listOfFiles) {
                             String listFile = (listOfFile.getName());
                             files = files + listFile + "<";
-                            //ByteBuffer toClient = ByteBuffer.wrap(listFile.getBytes());
-                            //serverChannel.write(toClient);
                         }
                         ByteBuffer toClient = ByteBuffer.wrap(files.getBytes());
                         serverChannel.write(toClient);
@@ -92,11 +90,7 @@ public class FileServer {
                     byte[] e = new byte[request.remaining()];
                     request.get(e);
                     String uploadRequest = new String(e);
-                    boolean isSubmitting = true;
-                    while(isSubmitting) {
-                        es.submit(new Upload(uploadRequest, serverChannel, isSubmitting));
-                    }
-                    es.shutdown();
+                    es.submit(new Upload(uploadRequest, serverChannel));
                     break;
                 case "dow":
                     byte[] f = new byte[request.remaining()];
@@ -111,7 +105,7 @@ public class FileServer {
                         serverChannel.write(dowCode);
                         FileInputStream dowFis = new FileInputStream(dowFile);
                         byte[] dowData = new byte[1024];
-                        int dowBytesRead = 0;
+                        int dowBytesRead;
                         while((dowBytesRead=dowFis.read(dowData)) != -1){
                             ByteBuffer dowBuffer = ByteBuffer.wrap(dowData, 0, dowBytesRead);
                             serverChannel.write(dowBuffer);
@@ -136,14 +130,12 @@ public class FileServer {
     public static class Upload implements Runnable{
         String uploadRequest;
         SocketChannel serverChannel;
-        boolean isSubmitting;
         private final static Semaphore uploadLock = new Semaphore(1);
         private static Semaphore uploadElement = new Semaphore(0);
 
-        public Upload(String k, SocketChannel j, boolean l){
+        public Upload(String k, SocketChannel j){
             this.uploadRequest = k;
             this.serverChannel = j;
-            this.isSubmitting = l;
         }
 
         public void run() {
@@ -183,7 +175,6 @@ public class FileServer {
             }
             uploadLock.release();
             uploadElement.release();
-            isSubmitting = false;
         }
     }
 }
