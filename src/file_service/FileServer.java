@@ -96,31 +96,7 @@ public class FileServer {
                     byte[] f = new byte[request.remaining()];
                     request.get(f);
                     String dowFileName = new String(f);
-
-                    System.out.println("File to download: " + dowFileName);
-                    File dowFile = new File("ServerFiles/" + dowFileName);
-                    boolean dowSuccess = false;
-                    if(dowFile.exists()){
-                        ByteBuffer dowCode = ByteBuffer.wrap("suc".getBytes());
-                        serverChannel.write(dowCode);
-                        FileInputStream dowFis = new FileInputStream(dowFile);
-                        byte[] dowData = new byte[1024];
-                        int dowBytesRead;
-                        while((dowBytesRead=dowFis.read(dowData)) != -1){
-                            ByteBuffer dowBuffer = ByteBuffer.wrap(dowData, 0, dowBytesRead);
-                            serverChannel.write(dowBuffer);
-                        }
-                        dowSuccess = true;
-                    }
-                    if (dowSuccess){
-                        System.out.println("File found");
-                    }
-                    else {
-                        ByteBuffer dowCode = ByteBuffer.wrap("fai".getBytes());
-                        serverChannel.write(dowCode);
-                        System.out.println("File not found");
-                    }
-                    serverChannel.close();
+                    es.submit(new Download(dowFileName, serverChannel));
                     break;
                 default:
                     System.out.print("Invalid command!");
@@ -176,5 +152,60 @@ public class FileServer {
             uploadLock.release();
             uploadElement.release();
         }
+    }
+
+    public static class Download implements Runnable{
+        String downloadRequest;
+        SocketChannel serverChannel;
+        private final static Semaphore downloadLock = new Semaphore(1);
+        private static Semaphore downloadElement = new Semaphore(0);
+
+        public Download(String k, SocketChannel j){
+            this.downloadRequest = k;
+            this.serverChannel = j;
+        }
+
+        public void run() {
+            try {
+                downloadLock.acquire();
+                System.out.println("File to download: " + downloadRequest);
+                File dowFile = new File("ServerFiles/" + downloadRequest);
+                boolean dowSuccess = false;
+                if (dowFile.exists()) {
+                    try {
+                        ByteBuffer dowCode = ByteBuffer.wrap("suc".getBytes());
+                        serverChannel.write(dowCode);
+                        FileInputStream dowFis = new FileInputStream(dowFile);
+                        byte[] dowData = new byte[1024];
+                        int dowBytesRead;
+                        while ((dowBytesRead = dowFis.read(dowData)) != -1) {
+                            ByteBuffer dowBuffer = ByteBuffer.wrap(dowData, 0, dowBytesRead);
+                            serverChannel.write(dowBuffer);
+                        }
+                        dowSuccess = true;
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                try {
+                    if (dowSuccess) {
+                        System.out.println("File found");
+                    } else {
+                        ByteBuffer dowCode = ByteBuffer.wrap("fai".getBytes());
+                        serverChannel.write(dowCode);
+                        System.out.println("File not found");
+                    }
+                    serverChannel.close();
+                } catch (IOException ex){
+                    ex.printStackTrace();
+                }
+            } catch (InterruptedException ex){
+                ex.printStackTrace();
+            }
+
+            downloadLock.release();
+            downloadElement.release();
+        }
+
     }
 }
