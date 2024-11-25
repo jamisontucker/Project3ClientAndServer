@@ -162,13 +162,26 @@ public class FileServer {
                     ex.printStackTrace();
                 }
                 System.out.println("File uploaded!");
-                ByteBuffer uplCode = ByteBuffer.wrap("suc".getBytes());
-                try{
-                    serverChannel.write(uplCode);
-                    fos.close();
-                    serverChannel.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                File uplFile = new File("ServerFiles/" + uploadRequest);
+
+                if (uplFile.exists()){
+                    ByteBuffer uplCode = ByteBuffer.wrap("suc".getBytes());
+                    try{
+                        serverChannel.write(uplCode);
+                        fos.close();
+                        serverChannel.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    ByteBuffer uplCode = ByteBuffer.wrap("fai".getBytes());
+                    try{
+                        serverChannel.write(uplCode);
+                        fos.close();
+                        serverChannel.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
